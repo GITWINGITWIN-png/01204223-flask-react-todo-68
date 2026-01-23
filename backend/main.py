@@ -20,7 +20,8 @@ todo_list = [
 
 @app.route('/api/todos/', methods=['GET'])
 def get_todos():
-    return jsonify(todo_list)
+    todos = TodoItem.query.all()
+    return jsonify([todo.to_dict() for todo in todos])
 
 def new_todo(data):
     if len(todo_list) == 0:
