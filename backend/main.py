@@ -5,6 +5,9 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 from flask_migrate import Migrate 
+from sqlalchemy import Integer, String, ForeignKey                            # เพิ่ม import Foreignkey
+from sqlalchemy.orm import Mapped, mapped_column, relationship                # เพิ่ม import relatiohship
+
 
 app = Flask(__name__)
 CORS(app)
@@ -56,14 +59,16 @@ def delete_todo(id):
 
 class Base(DeclarativeBase):
   pass
-
-db = SQLAlchemy(app, model_class=Base) 
-migrate = Migrate(app, db) 
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 class TodoItem(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(100))
     done: Mapped[bool] = mapped_column(default=False)
+
+    ##### เพิ่มส่วน relationship  ซึ่งตรงนี้จะไม่กระทบ schema database เลย (เพราะว่าไม่มีการ map ไปยังคอลัมน์ใดๆ)
+    comments: Mapped[list["Comment"]] = relationship(back_populates="todo")
 
     def to_dict(self):
         return {
@@ -72,8 +77,14 @@ class TodoItem(db.Model):
             "done": self.done
         }
 
+class Comment(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    message: Mapped[str] = mapped_column(String(250))
+    todo_id: Mapped[int] = mapped_column(ForeignKey('todo_item.id'))
+
+    todo: Mapped["TodoItem"] = relationship(back_populates="comments")
 #with app.app_context():
-#    db.create_all()
+#   db.create_all()
 
 
 INITIAL_TODOS = [
