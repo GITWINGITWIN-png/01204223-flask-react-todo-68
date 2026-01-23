@@ -57,7 +57,7 @@ def delete_todo(id):
 class Base(DeclarativeBase):
   pass
 
-db = SQLAlchemy(app, model_class=Base)
+db = SQLAlchemy(app, model_class=Base) 
 migrate = Migrate(app, db) 
 
 class TodoItem(db.Model):
@@ -72,7 +72,10 @@ class TodoItem(db.Model):
             "done": self.done
         }
 
-"""
+#with app.app_context():
+#    db.create_all()
+
+
 INITIAL_TODOS = [
     TodoItem(title='Learn Flask'),
     TodoItem(title='Build a Flask App'),
@@ -83,6 +86,3 @@ with app.app_context():
          for item in INITIAL_TODOS:
              db.session.add(item)
          db.session.commit()
-"""
-
-
