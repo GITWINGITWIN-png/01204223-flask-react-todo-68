@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import TodoItem from './TodoItem.jsx'
 
 function App() {
   const TODOLIST_API_URL = 'http://localhost:5000/api/todos/';
@@ -7,7 +8,7 @@ function App() {
   const [todoList, setTodoList] = useState([]);
   const [newTitle, setNewTitle] = useState("");
   // newComments จะเก็บ object ในรูปแบบ { todo_id: "ข้อความ", ... }
-  const [newComments, setNewComments] = useState({});
+  //const [newComments, setNewComments] = useState({});
 
   useEffect(() => {
     fetchTodoList();
@@ -78,28 +79,23 @@ function App() {
   }
 
   // ย้ายฟังก์ชันนี้เข้ามาข้างใน App component เพื่อให้เรียกใช้ state ได้
-  async function addNewComment(todoId) {
+  async function addNewComment(todoId, message) {
     try {
-      // URL ต้องตรงกับที่ backend กำหนดไว้
       const url = `${TODOLIST_API_URL}${todoId}/comments/`;
       const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // ดึงข้อความจาก state newComments โดยใช้ todoId เป็น key
-        body: JSON.stringify({ 'message': newComments[todoId] || "" }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 'message': message }), // ใช้ message ที่รับมา
       });
       
       if (response.ok) {
-        // เคลียร์ข้อความใน input ของ todo ตัวนั้น
-        setNewComments({ ...newComments, [todoId]: "" });
-        // โหลดข้อมูลใหม่เพื่อให้เห็น comment ที่เพิ่งเพิ่ม
-        await fetchTodoList();
+        await fetchTodoList(); // โหลดข้อมูลใหม่
+        return true; // ส่งค่ากลับบอกว่าสำเร็จ
       }
     } catch (error) {
       console.error("Error adding new comment:", error);
     }
+    return false;
   }
 
   return (
@@ -107,50 +103,18 @@ function App() {
       <h1>Todo List</h1>
       <ul>
         {todoList.map(todo => (
-          <li key={todo.id} style={{ marginBottom: '20px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span 
-                className={todo.done ? "done" : ""} 
-                style={{ textDecoration: todo.done ? 'line-through' : 'none', flexGrow: 1 }}
-              >
-                {todo.title}
-              </span>
-              <button onClick={() => toggleDone(todo.id)}>
-                {todo.done ? "Undo" : "Done"}
-              </button>
-              <button onClick={() => deleteTodo(todo.id)}>❌</button>
-            </div>
-
-            {/* ส่วนแสดง Comments */}
-            {(todo.comments && todo.comments.length > 0) && (
-              <div style={{ marginTop: '10px', marginLeft: '20px', fontSize: '0.9em' }}>
-                <b>Comments:</b>
-                <ul>
-                  {todo.comments.map(comment => (
-                    <li key={comment.id}>{comment.message}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* ส่วนฟอร์มเพิ่ม Comment */}
-            <div className="new-comment-forms" style={{ marginTop: '10px', marginLeft: '20px' }}>
-              <input
-                type="text"
-                placeholder="Add a comment..."
-                value={newComments[todo.id] || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  // อัปเดต state เฉพาะ key ของ todo ตัวนี้
-                  setNewComments({ ...newComments, [todo.id]: value });
-                }}
-              />
-              <button onClick={() => addNewComment(todo.id)}>Add Comment</button>
-            </div>
-          </li>
-        ))}
+          <TodoItem 
+            key={todo.id} 
+            todo={todo}
+            // *** ต้องส่งฟังก์ชันพวกนี้ลงไปให้ลูก ***
+            toggleDone={toggleDone}
+            deleteTodo={deleteTodo}
+            addNewComment={addNewComment} 
+          />
+          ))}
       </ul>
-
+      
+      {/* ส่วน Add New Task เหมือนเดิม */}
       <div style={{ marginTop: '20px', borderTop: '2px solid black', paddingTop: '10px' }}>
         <h3>New Task</h3>
         <input 
