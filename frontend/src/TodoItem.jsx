@@ -25,7 +25,7 @@ function TodoItem({ todo, toggleDone, deleteTodo, addNewComment }) {
               </span>
               {/* เรียกใช้ฟังก์ชันผ่าน props */}
               <button onClick={() => toggleDone(todo.id)}>
-                {todo.done ? "Undo" : "Done"}
+                {todo.done ? "Toggle Undo" : "Toggle Done"}
               </button>
               <button onClick={() => deleteTodo(todo.id)}>❌</button>
             </div>
