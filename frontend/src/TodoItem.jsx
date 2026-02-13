@@ -31,12 +31,20 @@ function TodoItem({ todo, toggleDone, deleteTodo, addNewComment }) {
             </div>
 
             {/* ส่วนแสดง Comments */}
+	    {(!todo.comments || todo.comments.length === 0) && (
+  <div style={{ marginTop: '10px', marginLeft: '20px', fontSize: '0.9em' }}>
+    <b>Comment:</b>
+    <ul>
+      <li>No comments</li>
+    </ul>
+  </div>
+)}
             {(todo.comments && todo.comments.length > 0) && (
               <div style={{ marginTop: '10px', marginLeft: '20px', fontSize: '0.9em' }}>
-                <b>Comments:</b>
+                <b>{todo.comments.length} Comments: </b>
                 <ul>
                   {todo.comments.map(comment => (
-                    <li key={comment.id}>{comment.message}</li>
+                    <li key={comment.id}>{comment.message} </li>
                   ))}
                 </ul>
               </div>
