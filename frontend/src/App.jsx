@@ -1,131 +1,47 @@
-import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from './context/AuthContext';
+
 import './App.css'
-import TodoItem from './TodoItem.jsx'
+
+import TodoList from './Todolist.jsx'
+import LoginForm from './Login.jsx';
+import PrivateRoute from './PrivateRoute.jsx';
 
 function App() {
   const TODOLIST_API_URL = 'http://localhost:5000/api/todos/';
-
-  const [todoList, setTodoList] = useState([]);
-  const [newTitle, setNewTitle] = useState("");
-  // newComments จะเก็บ object ในรูปแบบ { todo_id: "ข้อความ", ... }
-  //const [newComments, setNewComments] = useState({});
-
-  useEffect(() => {
-    fetchTodoList();
-  }, []);
-
-  async function fetchTodoList() {
-    try {
-      const response = await fetch(TODOLIST_API_URL);
-      if (!response.ok) {
-        throw new Error('Network error');
-      }
-      const data = await response.json();
-      setTodoList(data);
-    } catch (err) {
-      alert("Failed to fetch todo list. Make sure backend is running.");
-      console.error(err);
-    }
-  }
-
-  async function toggleDone(id) {
-    const toggle_api_url = `${TODOLIST_API_URL}${id}/toggle/`
-    try {
-      const response = await fetch(toggle_api_url, {
-        method: 'PATCH',
-      })
-      if (response.ok) {
-        const updatedTodo = await response.json();
-        // อัปเดต state โดยแทนที่ตัวเดิมด้วยตัวใหม่ที่ได้จาก server
-        setTodoList(todoList.map(todo => todo.id === id ? updatedTodo : todo));
-      }
-    } catch (error) {
-      console.error("Error toggling todo:", error);
-    }
-  }
-
-  async function addNewTodo() {
-    try {
-      const response = await fetch(TODOLIST_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 'title': newTitle }),
-      });
-      if (response.ok) {
-        const newTodo = await response.json();
-        // เพิ่ม todo ใหม่เข้าไปใน list และเคลียร์ช่อง input
-        setTodoList([...todoList, newTodo]);
-        setNewTitle("");
-      }
-    } catch (error) {
-      console.error("Error adding new todo:", error);
-    }
-  }
-
-  async function deleteTodo(id) {
-    const delete_api_url = `${TODOLIST_API_URL}${id}/`
-    try {
-      const response = await fetch(delete_api_url, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        setTodoList(todoList.filter(todo => todo.id !== id));
-      }
-    } catch (error) {
-      console.error("Error deleting todo:", error);
-    }
-  }
-
-  // ย้ายฟังก์ชันนี้เข้ามาข้างใน App component เพื่อให้เรียกใช้ state ได้
-  async function addNewComment(todoId, message) {
-    try {
-      const url = `${TODOLIST_API_URL}${todoId}/comments/`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 'message': message }), // ใช้ message ที่รับมา
-      });
-      
-      if (response.ok) {
-        await fetchTodoList(); // โหลดข้อมูลใหม่
-        return true; // ส่งค่ากลับบอกว่าสำเร็จ
-      }
-    } catch (error) {
-      console.error("Error adding new comment:", error);
-    }
-    return false;
-  }
+  const TODOLIST_LOGIN_URL = 'http://localhost:5000/api/login/';
 
   return (
-    <>
-      <h1>Todo List</h1>
-      <ul>
-        {todoList.map(todo => (
-          <TodoItem 
-            key={todo.id} 
-            todo={todo}
-            // *** ต้องส่งฟังก์ชันพวกนี้ลงไปให้ลูก ***
-            toggleDone={toggleDone}
-            deleteTodo={deleteTodo}
-            addNewComment={addNewComment} 
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <PrivateRoute>                              
+                <TodoList apiUrl={TODOLIST_API_URL}/>
+              </PrivateRoute>
+            } 
           />
-          ))}
-      </ul>
-      
-      {/* ส่วน Add New Task เหมือนเดิม */}
-      <div style={{ marginTop: '20px', borderTop: '2px solid black', paddingTop: '10px' }}>
-        <h3>New Task</h3>
-        <input 
-          type="text" 
-          placeholder="New task title..."
-          value={newTitle} 
-          onChange={(e) => setNewTitle(e.target.value)} 
-        />
-        <button onClick={addNewTodo}>Add Task</button>
-      </div>
-    </>
+          <Route 
+            path="/about" 
+            element={
+              <>
+                <h1>About</h1>
+                <p>This is a simple todo list application built with React and Flask.</p>
+                <a href="/">Back to Home</a>
+              </>
+            } 
+          />
+          <Route
+            path="/login"
+            element={
+              <LoginForm loginUrl={TODOLIST_LOGIN_URL} />
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 
