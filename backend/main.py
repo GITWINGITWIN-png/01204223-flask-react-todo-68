@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -6,12 +8,12 @@ from models import db, TodoItem, Comment, User
 import click 
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from flask_jwt_extended import JWTManager
-from password import password
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = password
-app.config['JWT_SECRET_KEY'] = 'fdsjkfjioi2rjshr2345hrsh043j5oij5545mairubnakrub'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET', 'fallback-secret-key')
 jwt = JWTManager(app)
 
 # เชื่อมต่อ db กับ app ที่นี่
