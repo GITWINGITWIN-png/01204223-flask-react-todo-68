@@ -37,6 +37,6 @@ jobs:
 
       - name: Run pytest
         env:
-          DATABASE_URL: sqlite:///:memory:
-          JWT_SECRET: test-secret-key-for-github-actions
+          DATABASE_URL: "sqlite:///:memory:"
+          JWT_SECRET: "test-secret-key-for-github-actions"
         run: pytest -q
