@@ -16,7 +16,7 @@ class TodoItem(db.Model):
     done: Mapped[bool] = mapped_column(default=False)
 
     comments: Mapped[list["Comment"]] = relationship(back_populates="todo", cascade="all, delete-orphan")
-
+#4564565
     # เหลือ to_dict แค่อันเดียวพอครับ
     def to_dict(self):
         return {
