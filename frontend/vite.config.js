@@ -9,4 +9,16 @@ export default defineConfig({
     environment: 'jsdom',                   // รันเทสแบบไม่มี browser
     setupFiles: './src/setupTests.js',      // ระบุโค้ดสำหรับเตรียมต่าง ๆ
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000/',
+        changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    outDir: '../backend/frontend-static',
+    emptyOutDir: true,
+  },
 })

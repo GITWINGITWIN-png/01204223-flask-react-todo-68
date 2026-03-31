@@ -3,3 +3,6 @@ __pycache__
 /instance
 password.py
 .env
+
+/frontend-static
+/local_config.py
