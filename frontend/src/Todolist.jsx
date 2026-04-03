@@ -80,7 +80,7 @@ function TodoList({apiUrl}) {
 
   async function deleteTodo(id) {
     const delete_api_url = `${TODOLIST_API_URL}${id}/`
-    try {a-string-secret-at-least-256-bits-long
+    try {
       const response = await fetch(delete_api_url, {
         method: 'DELETE',
         headers: {
